@@ -2,7 +2,6 @@ from datetime import datetime
 
 
 class SinhVien:
-    """Lớp đại diện cho một sinh viên."""
 
     def __init__(self, mssv="", ho_ten="", ngay_sinh="", gioi_tinh="Nam", lop="", email=""):
         self._mssv = mssv
@@ -12,7 +11,6 @@ class SinhVien:
         self._lop = lop
         self._email = email
 
-    # --- Getter ---
     @property
     def mssv(self):
         return self._mssv
@@ -37,7 +35,6 @@ class SinhVien:
     def email(self):
         return self._email
 
-    # --- Setter ---
     @mssv.setter
     def mssv(self, value):
         self._mssv = value
@@ -69,7 +66,6 @@ class SinhVien:
         return self.__str__()
 
     def to_dict(self):
-        """Chuyển đổi thành dictionary để hiển thị."""
         return {
             "MSSV": self._mssv,
             "Họ tên": self._ho_ten,
@@ -81,14 +77,12 @@ class SinhVien:
 
 
 class MonHoc:
-    """Lớp đại diện cho một môn học."""
 
     def __init__(self, ma_mon="", ten_mon="", so_tin_chi=0):
         self._ma_mon = ma_mon
         self._ten_mon = ten_mon
         self._so_tin_chi = so_tin_chi
 
-    # --- Getter ---
     @property
     def ma_mon(self):
         return self._ma_mon
@@ -101,7 +95,6 @@ class MonHoc:
     def so_tin_chi(self):
         return self._so_tin_chi
 
-    # --- Setter ---
     @ma_mon.setter
     def ma_mon(self, value):
         self._ma_mon = value
@@ -129,7 +122,6 @@ class MonHoc:
 
 
 class LopHocPhan:
-    """Lớp đại diện cho một lớp học phần."""
 
     def __init__(self, ma_lhp="", ma_mon="", hoc_ky="", nam_hoc="", ds_mssv=None):
         self._ma_lhp = ma_lhp
@@ -138,7 +130,6 @@ class LopHocPhan:
         self._nam_hoc = nam_hoc      # VD: "2024-2025"
         self._ds_mssv = ds_mssv if ds_mssv is not None else []
 
-    # --- Getter ---
     @property
     def ma_lhp(self):
         return self._ma_lhp
@@ -159,7 +150,6 @@ class LopHocPhan:
     def ds_mssv(self):
         return self._ds_mssv
 
-    # --- Setter ---
     @ma_lhp.setter
     def ma_lhp(self, value):
         self._ma_lhp = value
@@ -181,21 +171,18 @@ class LopHocPhan:
         self._ds_mssv = value
 
     def them_sinh_vien(self, mssv):
-        """Thêm MSSV vào danh sách lớp."""
         if mssv not in self._ds_mssv:
             self._ds_mssv.append(mssv)
             return True
         return False
 
     def xoa_sinh_vien(self, mssv):
-        """Xóa MSSV khỏi danh sách lớp."""
         if mssv in self._ds_mssv:
             self._ds_mssv.remove(mssv)
             return True
         return False
 
     def so_luong_sv(self):
-        """Trả về số lượng sinh viên trong lớp."""
         return len(self._ds_mssv)
 
     def __str__(self):
@@ -215,7 +202,6 @@ class LopHocPhan:
 
 
 class BangDiem:
-    """Lớp đại diện cho bảng điểm của sinh viên theo môn học."""
 
     def __init__(self, mssv="", ma_mon="", diem_qua_trinh=0.0, diem_thi=0.0):
         self._mssv = mssv
@@ -223,7 +209,6 @@ class BangDiem:
         self._diem_qua_trinh = diem_qua_trinh  # Điểm quá trình (50%)
         self._diem_thi = diem_thi                # Điểm thi (50%)
 
-    # --- Getter ---
     @property
     def mssv(self):
         return self._mssv
@@ -310,7 +295,6 @@ class BangDiem:
         else:
             return "Kém"
 
-    # --- Setter ---
     @mssv.setter
     def mssv(self, value):
         self._mssv = value
