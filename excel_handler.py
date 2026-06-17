@@ -1,25 +1,9 @@
-# excel_handler.py - Đọc/ghi dữ liệu từ file Excel (.xlsx)
-# Sử dụng thư viện openpyxl
-
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from models import SinhVien, MonHoc, BangDiem
 
 
 def import_sinh_vien(filepath):
-    """
-    Đọc danh sách sinh viên từ file Excel.
-    
-    Cấu trúc file Excel (Sheet đầu tiên):
-    Hàng 1: Header (MSSV | Họ tên | Ngày sinh | Giới tính | Lớp | Email)
-    Hàng 2+: Dữ liệu
-    
-    Args:
-        filepath: Đường dẫn file .xlsx
-        
-    Returns:
-        tuple: (list[SinhVien], list[str]) - (danh sách SV, danh sách lỗi)
-    """
     ds_sv = []
     errors = []
     
@@ -32,7 +16,6 @@ def import_sinh_vien(filepath):
                 continue  # Bỏ qua hàng trống
             
             try:
-                # Đọc các cột, xử lý None
                 mssv = str(row[0]).strip() if row[0] is not None else ""
                 ho_ten = str(row[1]).strip() if len(row) > 1 and row[1] is not None else ""
                 ngay_sinh = str(row[2]).strip() if len(row) > 2 and row[2] is not None else ""
@@ -63,14 +46,6 @@ def import_sinh_vien(filepath):
 
 
 def import_mon_hoc(filepath):
-    """
-    Đọc danh sách môn học từ file Excel.
-    
-    Cấu trúc: Mã môn | Tên môn | Số tín chỉ
-    
-    Returns:
-        tuple: (list[MonHoc], list[str])
-    """
     ds_mh = []
     errors = []
     
@@ -108,14 +83,6 @@ def import_mon_hoc(filepath):
 
 
 def import_diem(filepath):
-    """
-    Đọc bảng điểm từ file Excel.
-    
-    Cấu trúc: MSSV | Mã môn | Điểm quá trình | Điểm thi
-    
-    Returns:
-        tuple: (list[BangDiem], list[str])
-    """
     ds_diem = []
     errors = []
     
@@ -139,7 +106,6 @@ def import_diem(filepath):
                     errors.append(f"Hàng {row_idx}: Thiếu mã môn cho MSSV '{mssv}'")
                     continue
                 
-                # Validate điểm
                 if diem_qt < 0 or diem_qt > 10:
                     errors.append(f"Hàng {row_idx}: Điểm QT không hợp lệ ({diem_qt})")
                     continue
@@ -162,12 +128,10 @@ def import_diem(filepath):
 
 
 def export_template_sinh_vien(filepath):
-    """Tạo file Excel mẫu cho danh sách sinh viên."""
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Danh sách Sinh viên"
     
-    # Header style
     header_font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
     header_align = Alignment(horizontal="center", vertical="center")
@@ -187,7 +151,6 @@ def export_template_sinh_vien(filepath):
         cell.border = thin_border
         ws.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = width
     
-    # Dữ liệu mẫu
     sample_data = [
         ["SV001", "Nguyễn Văn An", "15/03/2003", "Nam", "CNTT01", "an.nv@email.com"],
         ["SV002", "Trần Thị Bình", "22/07/2003", "Nữ", "CNTT01", "binh.tt@email.com"],
@@ -210,7 +173,6 @@ def export_template_sinh_vien(filepath):
 
 
 def export_template_mon_hoc(filepath):
-    """Tạo file Excel mẫu cho danh sách môn học."""
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Danh sách Môn học"
@@ -256,7 +218,6 @@ def export_template_mon_hoc(filepath):
 
 
 def export_template_diem(filepath):
-    """Tạo file Excel mẫu cho bảng điểm."""
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Bảng điểm"
