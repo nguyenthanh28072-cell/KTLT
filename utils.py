@@ -5,16 +5,6 @@ from datetime import datetime
 
 
 def validate_mssv(mssv):
-    """
-    Kiểm tra MSSV hợp lệ.
-    MSSV phải có ít nhất 3 ký tự, chỉ chứa chữ và số.
-    
-    Args:
-        mssv: Mã số sinh viên cần kiểm tra
-        
-    Returns:
-        tuple: (bool, str) - (hợp lệ, thông báo lỗi)
-    """
     if not mssv or not mssv.strip():
         return False, "MSSV không được để trống"
     mssv = mssv.strip()
@@ -26,15 +16,6 @@ def validate_mssv(mssv):
 
 
 def validate_ho_ten(ho_ten):
-    """
-    Kiểm tra họ tên hợp lệ.
-    
-    Args:
-        ho_ten: Họ tên cần kiểm tra
-        
-    Returns:
-        tuple: (bool, str) - (hợp lệ, thông báo lỗi)
-    """
     if not ho_ten or not ho_ten.strip():
         return False, "Họ tên không được để trống"
     if len(ho_ten.strip()) < 2:
@@ -45,15 +26,6 @@ def validate_ho_ten(ho_ten):
 
 
 def validate_ngay_sinh(ngay_sinh):
-    """
-    Kiểm tra ngày sinh hợp lệ (dd/mm/yyyy).
-    
-    Args:
-        ngay_sinh: Chuỗi ngày sinh
-        
-    Returns:
-        tuple: (bool, str) - (hợp lệ, thông báo lỗi)
-    """
     if not ngay_sinh or not ngay_sinh.strip():
         return False, "Ngày sinh không được để trống"
     try:
@@ -71,29 +43,8 @@ def validate_ngay_sinh(ngay_sinh):
 
 
 def generate_hust_email(ho_ten, mssv):
-    """
-    Sinh email HUST theo quy tắc:
-    - Tên (từ cuối cùng, bỏ dấu, viết hoa chữ đầu)
-    - Dấu chấm "."
-    - Chữ cái đầu viết hoa của Họ và Đệm (bỏ dấu)
-    - MSSV bỏ đi tiền tố "20"
-    - @sis.hust.edu.vn
-    
-    Ví dụ:
-        "Nguyễn Văn An",  MSSV "20215678" → "An.NV215678@sis.hust.edu.vn"
-        "Nguyễn Văn A B", MSSV "20215678" → "B.NVA215678@sis.hust.edu.vn"
-    
-    Args:
-        ho_ten: Họ tên sinh viên
-        mssv: Mã số sinh viên
-        
-    Returns:
-        str: Email theo định dạng HUST, hoặc "" nếu dữ liệu không đủ
-    """
     if not ho_ten or not mssv:
         return ""
-    
-    # Bản đồ bỏ dấu tiếng Việt
     char_map = {
         'à':'a', 'á':'a', 'ả':'a', 'ã':'a', 'ạ':'a',
         'ă':'a', 'ằ':'a', 'ắ':'a', 'ẳ':'a', 'ẵ':'a', 'ặ':'a',
@@ -111,24 +62,20 @@ def generate_hust_email(ho_ten, mssv):
     }
     
     def strip_accents(txt):
-        """Bỏ dấu tiếng Việt."""
         return "".join(char_map.get(c, c) for c in txt.lower())
     
     parts = ho_ten.strip().split()
     if not parts:
         return ""
     
-    # Tên = từ cuối cùng, bỏ dấu, viết hoa chữ đầu
     ten = strip_accents(parts[-1]).capitalize()
     
-    # Chữ cái đầu của Họ Đệm (các từ trước tên), bỏ dấu, viết hoa
     ho_dem_initials = ""
     for part in parts[:-1]:
         if part:
             first_char = strip_accents(part[0]).upper()
             ho_dem_initials += first_char
     
-    # Bỏ tiền tố "20" khỏi MSSV
     mssv_suffix = mssv.strip()
     if mssv_suffix.startswith("20"):
         mssv_suffix = mssv_suffix[2:]
@@ -137,18 +84,6 @@ def generate_hust_email(ho_ten, mssv):
 
 
 def validate_email(email, ho_ten="", mssv=""):
-    """
-    Kiểm tra email hợp lệ.
-    Nếu có ho_ten và mssv, kiểm tra email khớp định dạng HUST.
-    
-    Args:
-        email: Địa chỉ email
-        ho_ten: Họ tên sinh viên (tùy chọn, dùng để kiểm tra định dạng HUST)
-        mssv: Mã số sinh viên (tùy chọn, dùng để kiểm tra định dạng HUST)
-        
-    Returns:
-        tuple: (bool, str) - (hợp lệ, thông báo lỗi)
-    """
     if not email or not email.strip():
         return False, "Email không được để trống"
     
@@ -156,7 +91,6 @@ def validate_email(email, ho_ten="", mssv=""):
     if not re.match(pattern, email.strip()):
         return False, "Email không hợp lệ"
     
-    # Nếu có đủ thông tin, kiểm tra email theo định dạng HUST
     if ho_ten and mssv:
         expected = generate_hust_email(ho_ten, mssv)
         if email.strip().lower() != expected.lower():
@@ -166,15 +100,6 @@ def validate_email(email, ho_ten="", mssv=""):
 
 
 def validate_diem(diem_str):
-    """
-    Kiểm tra điểm hợp lệ (0-10).
-    
-    Args:
-        diem_str: Chuỗi điểm số
-        
-    Returns:
-        tuple: (bool, float, str) - (hợp lệ, giá trị điểm, thông báo lỗi)
-    """
     if not diem_str or not str(diem_str).strip():
         return False, 0.0, "Điểm không được để trống"
     try:
@@ -187,16 +112,6 @@ def validate_diem(diem_str):
 
 
 def validate_so_tin_chi(stc_str):
-    """
-    Kiểm tra số tín chỉ hợp lệ.
-    Chỉ chấp nhận: 2, 3, 4, 6, 8.
-    
-    Args:
-        stc_str: Chuỗi số tín chỉ
-        
-    Returns:
-        tuple: (bool, int, str) - (hợp lệ, giá trị, thông báo lỗi)
-    """
     if not stc_str or not str(stc_str).strip():
         return False, 0, "Số tín chỉ không được để trống"
     try:
@@ -209,17 +124,6 @@ def validate_so_tin_chi(stc_str):
 
 
 def validate_ma_mon(ma_mon):
-    """
-    Kiểm tra mã môn hợp lệ.
-    Mã môn phải có đúng 6 ký tự: 2 chữ cái đầu + 4 chữ số sau.
-    VD: IT1234, MI3010
-    
-    Args:
-        ma_mon: Mã môn học
-        
-    Returns:
-        tuple: (bool, str) - (hợp lệ, thông báo lỗi)
-    """
     if not ma_mon or not ma_mon.strip():
         return False, "Mã môn không được để trống"
     ma_mon = ma_mon.strip()
@@ -229,33 +133,14 @@ def validate_ma_mon(ma_mon):
 
 
 def clear_screen():
-    """Xóa màn hình console."""
     os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 
 def format_diem(diem):
-    """
-    Định dạng hiển thị điểm (1 chữ số thập phân).
-    
-    Args:
-        diem: Điểm số (float)
-        
-    Returns:
-        str: Điểm đã format
-    """
     return f"{diem:.1f}"
 
 
 def get_xep_loai_color(xep_loai):
-    """
-    Trả về mã màu tương ứng với xếp loại để hiển thị trên GUI.
-    
-    Args:
-        xep_loai: Chuỗi xếp loại
-        
-    Returns:
-        str: Mã màu hex
-    """
     colors = {
         "Xuất sắc": "#00e676",   # Xanh lá sáng
         "Giỏi": "#69f0ae",       # Xanh lá nhạt
@@ -269,18 +154,11 @@ def get_xep_loai_color(xep_loai):
 
 
 def vietnamese_sort_key(fullname):
-    """
-    Tạo khóa sắp xếp cho họ tên tiếng Việt.
-    Sắp xếp ưu tiên theo Tên (từ cuối cùng), sau đó đến Họ lót (các từ trước).
-    Chuyển tiếng Việt có dấu thành không dấu để so sánh chính xác theo bảng chữ cái A-Z.
-    """
     if not fullname:
         return ""
     
-    # Chuyển sang chữ thường
     name = fullname.strip().lower()
     
-    # Bản đồ chuyển ký tự tiếng Việt có dấu sang không dấu
     char_map = {
         'à':'a', 'á':'a', 'ả':'a', 'ã':'a', 'ạ':'a',
         'ă':'a', 'ằ':'a', 'ắ':'a', 'ẳ':'a', 'ẵ':'a', 'ặ':'a',
@@ -304,10 +182,8 @@ def vietnamese_sort_key(fullname):
     if not parts:
         return ""
         
-    # Lấy tên và họ lót
     ten = parts[-1]
     ho_lot = " ".join(parts[:-1]) if len(parts) > 1 else ""
     
-    # Trả về tuple (Tên không dấu, Họ lót không dấu, Tên gốc, Họ lót gốc) để làm khóa sắp xếp
     return (strip_accents(ten), strip_accents(ho_lot), ten, ho_lot)
 
