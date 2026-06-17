@@ -1,6 +1,3 @@
-# gui/dialogs.py - Các dialog popup cho thêm/sửa dữ liệu
-# Sử dụng ttkbootstrap Toplevel
-
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
@@ -15,7 +12,6 @@ from utils import (
 
 
 class BaseDialog(ttk.Toplevel):
-    """Lớp cơ sở cho các dialog popup."""
 
     def __init__(self, parent, title, size=(500, 450)):
         super().__init__(parent)
@@ -25,7 +21,6 @@ class BaseDialog(ttk.Toplevel):
         self.transient(parent)
         self.grab_set()
 
-        # Căn giữa dialog
         self.update_idletasks()
         x = parent.winfo_rootx() + (parent.winfo_width() // 2) - (size[0] // 2)
         y = parent.winfo_rooty() + (parent.winfo_height() // 2) - (size[1] // 2)
@@ -38,7 +33,6 @@ class BaseDialog(ttk.Toplevel):
         self.main_frame.pack(fill=BOTH, expand=True)
 
     def _create_field(self, parent, label, row, default="", readonly=False, widget_type="entry"):
-        """Tạo một trường nhập liệu."""
         ttk.Label(
             parent, text=label, font=("Segoe UI", 10)
         ).grid(row=row, column=0, sticky=W, pady=(0, 5), padx=(0, 10))
@@ -63,7 +57,6 @@ class BaseDialog(ttk.Toplevel):
             return var, combo
 
     def _create_buttons(self, parent, on_save):
-        """Tạo nút Lưu và Hủy."""
         btn_frame = ttk.Frame(parent)
         btn_frame.pack(fill=X, pady=(20, 0))
 
@@ -79,7 +72,6 @@ class BaseDialog(ttk.Toplevel):
 
 
 class SinhVienDialog(BaseDialog):
-    """Dialog thêm/sửa sinh viên."""
 
     def __init__(self, parent, sv=None):
         title = "✏️ Cập nhật thông tin Sinh Viên" if sv else "➕ Thêm Sinh Viên"
@@ -87,7 +79,6 @@ class SinhVienDialog(BaseDialog):
 
         self.sv = sv  # None = thêm mới, có giá trị = sửa
 
-        # Tiêu đề
         ttk.Label(
             self.main_frame, text=title,
             font=("Segoe UI", 14, "bold"), bootstyle="primary"
@@ -95,7 +86,6 @@ class SinhVienDialog(BaseDialog):
 
         ttk.Separator(self.main_frame).pack(fill=X, pady=(0, 15))
 
-        # Form fields
         form = ttk.Frame(self.main_frame)
         form.pack(fill=X)
         form.columnconfigure(1, weight=1)
@@ -114,7 +104,6 @@ class SinhVienDialog(BaseDialog):
             default=sv.ngay_sinh if sv else ""
         )
 
-        # Giới tính (Combobox)
         self.var_gioi_tinh, self.cmb_gioi_tinh = self._create_field(
             form, "Giới tính:", 3,
             default=sv.gioi_tinh if sv else "Nam",
@@ -131,7 +120,6 @@ class SinhVienDialog(BaseDialog):
             default=sv.email if sv else ""
         )
 
-        # Nút tự động sinh email
         auto_btn_frame = ttk.Frame(self.main_frame)
         auto_btn_frame.pack(fill=X, pady=(5, 0))
         ttk.Button(
@@ -140,21 +128,17 @@ class SinhVienDialog(BaseDialog):
             command=self._auto_generate_email
         ).pack(side=LEFT)
 
-        # Ghi chú format
         ttk.Label(
             self.main_frame,
             text="📌 Ngày sinh định dạng: dd/mm/yyyy\n📌 Email: Tên.HọĐệm[MSSV bỏ 20]@sis.hust.edu.vn\n     VD: Nguyễn Văn An (20215678) → An.NV215678@sis.hust.edu.vn",
             font=("Segoe UI", 8), bootstyle="secondary"
         ).pack(anchor=W, pady=(10, 0))
 
-        # Buttons
         self._create_buttons(self.main_frame, self._on_save)
 
-        # Focus vào ô đầu tiên
         self.after(100, lambda: self.focus_set())
 
     def _auto_generate_email(self):
-        """Tự động sinh email từ họ tên và MSSV."""
         ho_ten = self.var_ho_ten.get().strip()
         mssv = self.var_mssv.get().strip()
         if not ho_ten or not mssv:
@@ -167,7 +151,6 @@ class SinhVienDialog(BaseDialog):
         self.var_email.set(email)
 
     def _on_save(self):
-        """Xử lý khi nhấn Lưu."""
         mssv = self.var_mssv.get().strip()
         ho_ten = self.var_ho_ten.get().strip()
         ngay_sinh = self.var_ngay_sinh.get().strip()
@@ -175,7 +158,6 @@ class SinhVienDialog(BaseDialog):
         lop = self.var_lop.get().strip()
         email = self.var_email.get().strip()
 
-        # Validation
         ok, msg = validate_mssv(mssv)
         if not ok:
             Messagebox.show_error(msg, "Lỗi nhập liệu", parent=self)
@@ -200,13 +182,11 @@ class SinhVienDialog(BaseDialog):
             Messagebox.show_error("Lớp không được để trống!", "Lỗi nhập liệu", parent=self)
             return
 
-        # Tạo đối tượng sinh viên
         self.result = SinhVien(mssv, ho_ten, ngay_sinh, gioi_tinh, lop, email)
         self.destroy()
 
 
 class MonHocDialog(BaseDialog):
-    """Dialog thêm/sửa môn học."""
 
     def __init__(self, parent, mh=None):
         title = "✏️ Cập nhật thông tin Học Phần" if mh else "➕ Thêm Học Phần"
@@ -272,7 +252,6 @@ class MonHocDialog(BaseDialog):
 
 
 class LopHocPhanDialog(BaseDialog):
-    """Dialog thêm/sửa lớp học phần."""
 
     def __init__(self, parent, ds_mon_hoc, lhp=None):
         title = "✏️ Cập nhật thông tin Lớp Học Phần" if lhp else "➕ Thêm Lớp Học Phần"
@@ -298,7 +277,6 @@ class LopHocPhanDialog(BaseDialog):
             readonly=(lhp is not None)
         )
 
-        # Combobox chọn môn học
         self.var_ma_mon, self.cmb_mon = self._create_field(
             form, "Học phần:", 1,
             default=lhp.ma_mon if lhp else "",
@@ -312,7 +290,6 @@ class LopHocPhanDialog(BaseDialog):
                     self.cmb_mon.current(i)
                     break
 
-        # Học kỳ
         self.var_hoc_ky, self.cmb_hk = self._create_field(
             form, "Học kỳ:", 2,
             default=lhp.hoc_ky if lhp else "2025.1",
@@ -337,7 +314,6 @@ class LopHocPhanDialog(BaseDialog):
             Messagebox.show_error("Mã lớp HP không được để trống!", "Lỗi", parent=self)
             return
 
-        # Lấy mã môn từ combobox (format: "MA_MON - Tên môn")
         ma_mon = ma_mon_raw.split(" - ")[0].strip() if " - " in ma_mon_raw else ma_mon_raw
 
         if not ma_mon:
@@ -354,8 +330,6 @@ class LopHocPhanDialog(BaseDialog):
 
 
 class DiemDialog(BaseDialog):
-    """Dialog nhập/cập nhật điểm."""
-
     def __init__(self, parent, ds_sinh_vien, ds_mon_hoc, bd=None):
         title = "✏️ Cập Nhật Điểm" if bd else "➕ Nhập Điểm"
         super().__init__(parent, title, (520, 450))
@@ -375,7 +349,6 @@ class DiemDialog(BaseDialog):
         form.pack(fill=X)
         form.columnconfigure(1, weight=1)
 
-        # Sinh viên (Combobox)
         self.var_mssv, self.cmb_sv = self._create_field(
             form, "Sinh viên:", 0,
             default="",
@@ -390,7 +363,6 @@ class DiemDialog(BaseDialog):
                     break
             self.cmb_sv.configure(state="disabled")
 
-        # Môn học (Combobox)
         self.var_ma_mon, self.cmb_mon = self._create_field(
             form, "Học phần:", 1,
             default="",
@@ -405,7 +377,6 @@ class DiemDialog(BaseDialog):
                     break
             self.cmb_mon.configure(state="disabled")
 
-        # Điểm
         self.var_diem_qt = self._create_field(
             form, "Điểm quá trình:", 2,
             default=str(bd.diem_qua_trinh) if bd else ""
@@ -415,7 +386,6 @@ class DiemDialog(BaseDialog):
             default=str(bd.diem_thi) if bd else ""
         )
 
-        # Ghi chú
         note_frame = tk.LabelFrame(self.main_frame, text="📌 Ghi chú", padx=10, pady=10)
         note_frame.pack(fill=X, pady=(15, 0))
         ttk.Label(
@@ -432,7 +402,6 @@ class DiemDialog(BaseDialog):
         diem_qt_str = self.var_diem_qt.get().strip()
         diem_thi_str = self.var_diem_thi.get().strip()
 
-        # Parse MSSV và mã môn
         mssv = mssv_raw.split(" - ")[0].strip() if " - " in mssv_raw else mssv_raw
         ma_mon = ma_mon_raw.split(" - ")[0].strip() if " - " in ma_mon_raw else ma_mon_raw
 
@@ -458,7 +427,6 @@ class DiemDialog(BaseDialog):
 
 
 class BangDiemSVDialog(BaseDialog):
-    """Dialog xem bảng điểm chi tiết của 1 sinh viên."""
 
     def __init__(self, parent, sv, ds_bang_diem, ds_mon_hoc, gpa4, gpa10, xep_loai):
         super().__init__(parent, f"📋 Bảng Điểm - {sv.ho_ten}", (700, 520))
@@ -469,7 +437,6 @@ class BangDiemSVDialog(BaseDialog):
         self.gpa10 = gpa10
         self.xep_loai = xep_loai
 
-        # Thông tin SV
         info_frame = tk.LabelFrame(self.main_frame, text="👤 Thông tin sinh viên", padx=10, pady=10)
         info_frame.pack(fill=X, pady=(0, 10))
 
@@ -485,7 +452,6 @@ class BangDiemSVDialog(BaseDialog):
         ttk.Label(info_grid, text=f"GPA (hệ 4): {gpa4_str} | GPA (hệ 10): {gpa10_str} | Xếp loại: {xep_loai}",
                   font=("Segoe UI", 10, "bold"), bootstyle="success").grid(row=1, column=1, sticky=W)
 
-        # Bảng điểm
         tree_frame = ttk.Frame(self.main_frame)
         tree_frame.pack(fill=BOTH, expand=True)
 
@@ -500,13 +466,11 @@ class BangDiemSVDialog(BaseDialog):
             tree.heading(col, text=heading)
             tree.column(col, width=width, anchor=CENTER)
 
-        # Scrollbar
         scrollbar = ttk.Scrollbar(tree_frame, orient=VERTICAL, command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=RIGHT, fill=Y)
         tree.pack(fill=BOTH, expand=True)
 
-        # Điền dữ liệu
         for bd in ds_bang_diem:
             ten_mon = ""
             tin_chi = ""
@@ -522,7 +486,6 @@ class BangDiemSVDialog(BaseDialog):
                 bd.diem_chu, bd.xep_loai
             ))
 
-        # Khung chứa các nút điều khiển dưới cùng
         btn_frame = ttk.Frame(self.main_frame)
         btn_frame.pack(fill=X, pady=(10, 0))
 
@@ -537,7 +500,6 @@ class BangDiemSVDialog(BaseDialog):
         ).pack(side=RIGHT)
 
     def _export_txt(self):
-        """Xuất bảng điểm chi tiết thành tệp định dạng văn bản .txt."""
         from tkinter import filedialog
         
         filepath = filedialog.asksaveasfilename(
