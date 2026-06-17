@@ -1,6 +1,3 @@
-# gui/frames.py - Các frame nội dung cho từng chức năng
-# Sinh viên, Môn học, Lớp HP, Điểm
-
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
@@ -16,7 +13,6 @@ from excel_handler import (
 
 
 class BaseFrame(ttk.Frame):
-    """Lớp cơ sở cho các frame nội dung."""
 
     def __init__(self, parent, title, icon, style="primary"):
         super().__init__(parent)
@@ -26,7 +22,6 @@ class BaseFrame(ttk.Frame):
         self.style = style
 
     def _build_header(self, parent_frame):
-        """Xây dựng tiêu đề frame."""
         header = ttk.Frame(parent_frame)
         header.pack(fill=X, padx=20, pady=(20, 10))
 
@@ -38,7 +33,6 @@ class BaseFrame(ttk.Frame):
         return header
 
     def _build_search_bar(self, parent_frame, search_callback, options=None):
-        """Xây dựng thanh tìm kiếm."""
         search_frame = tk.LabelFrame(parent_frame, text="🔍 Tìm kiếm", padx=10, pady=10)
         search_frame.pack(fill=X, padx=20, pady=(0, 10))
 
@@ -78,11 +72,9 @@ class BaseFrame(ttk.Frame):
         return search_frame
 
     def _build_treeview(self, parent_frame, columns, headings_widths, height=15):
-        """Xây dựng Treeview với scrollbar."""
         tree_container = ttk.Frame(parent_frame)
         tree_container.pack(fill=BOTH, expand=True, padx=20, pady=(0, 5))
 
-        # Treeview
         tree = ttk.Treeview(
             tree_container, columns=columns,
             show="headings", height=height, bootstyle="info"
@@ -92,15 +84,12 @@ class BaseFrame(ttk.Frame):
             tree.heading(col, text=heading, command=lambda c=col: self._sort_treeview(tree, c))
             tree.column(col, width=width, anchor=CENTER)
 
-        # Scrollbar dọc
         vsb = ttk.Scrollbar(tree_container, orient=VERTICAL, command=tree.yview)
         tree.configure(yscrollcommand=vsb.set)
 
-        # Scrollbar ngang
         hsb = ttk.Scrollbar(tree_container, orient=HORIZONTAL, command=tree.xview)
         tree.configure(xscrollcommand=hsb.set)
 
-        # Layout
         tree.grid(row=0, column=0, sticky=NSEW)
         vsb.grid(row=0, column=1, sticky=NS)
         hsb.grid(row=1, column=0, sticky=EW)
@@ -110,15 +99,12 @@ class BaseFrame(ttk.Frame):
         return tree
 
     def _sort_treeview(self, tree, col):
-        """Sắp xếp Treeview khi click header."""
         items = [(tree.set(k, col), k) for k in tree.get_children('')]
-        # Thử sắp xếp theo số
         try:
             items.sort(key=lambda t: float(t[0]))
         except ValueError:
             items.sort(key=lambda t: t[0].lower())
 
-        # Đảo chiều nếu đã sắp xếp tăng dần
         if hasattr(self, f'_sort_reverse_{col}'):
             reverse = getattr(self, f'_sort_reverse_{col}')
             setattr(self, f'_sort_reverse_{col}', not reverse)
@@ -131,7 +117,6 @@ class BaseFrame(ttk.Frame):
             tree.move(k, '', index)
 
     def _build_action_buttons(self, parent_frame, on_add, on_edit, on_delete, extra_buttons=None):
-        """Xây dựng các nút thao tác."""
         btn_frame = ttk.Frame(parent_frame)
         btn_frame.pack(fill=X, padx=20, pady=(5, 15))
 
@@ -157,7 +142,6 @@ class BaseFrame(ttk.Frame):
                     command=cmd, padding=(12, 8)
                 ).pack(side=LEFT, padx=(0, 8))
 
-        # Label đếm
         self.lbl_count = ttk.Label(
             btn_frame, text="", font=("Segoe UI", 9), bootstyle="secondary"
         )
@@ -165,12 +149,7 @@ class BaseFrame(ttk.Frame):
 
         return btn_frame
 
-
-# ============================================================
-# FRAME QUẢN LÝ SINH VIÊN
-# ============================================================
 class SinhVienFrame(BaseFrame):
-    """Frame quản lý sinh viên."""
 
     def __init__(self, parent, sv_manager, on_data_changed):
         super().__init__(parent, "Quản Lý Sinh Viên", "👤", "primary")
@@ -181,20 +160,17 @@ class SinhVienFrame(BaseFrame):
     def _build_ui(self):
         self._build_header(self)
 
-        # Thanh tìm kiếm
         self._build_search_bar(
             self, self._search,
             options=["MSSV", "Họ tên", "Lớp"]
         )
 
-        # Bảng dữ liệu
         columns = ("mssv", "ho_ten", "ngay_sinh", "gioi_tinh", "lop", "email")
         headings = [("MSSV", 90), ("Họ tên", 180), ("Ngày sinh", 100),
                     ("Giới tính", 80), ("Lớp", 100), ("Email", 180)]
         self.tree = self._build_treeview(self, columns, headings)
         self.tree.bind("<Double-1>", lambda e: self._on_edit())
 
-        # Nút thao tác
         extra = [
             ("📥 Import Excel", "info", self._on_import_excel),
             ("🖨️ In ra", "warning", self._on_export_template),
@@ -204,11 +180,9 @@ class SinhVienFrame(BaseFrame):
         self.refresh()
 
     def refresh(self):
-        """Tải lại dữ liệu vào Treeview."""
         for item in self.tree.get_children():
             self.tree.delete(item)
-        
-        # Sắp xếp danh sách sinh viên theo tên tiếng Việt
+ 
         self.sv_manager.sap_xep_mac_dinh()
         
         for sv in self.sv_manager.ds_sinh_vien:
@@ -219,13 +193,11 @@ class SinhVienFrame(BaseFrame):
         self.lbl_count.configure(text=f"Tổng: {self.sv_manager.so_luong()} sinh viên")
 
     def _search(self):
-        """Tìm kiếm sinh viên."""
         keyword = self.var_search.get()
         tieu_chi_map = {"MSSV": "mssv", "Họ tên": "ho_ten", "Lớp": "lop"}
         tieu_chi = tieu_chi_map.get(self.var_search_type.get(), "mssv")
         results = self.sv_manager.tim_kiem(keyword, tieu_chi)
 
-        # Sắp xếp kết quả tìm kiếm theo bảng chữ cái tiếng Việt
         from utils import vietnamese_sort_key
         results.sort(key=lambda sv: vietnamese_sort_key(sv.ho_ten))
 
@@ -239,7 +211,6 @@ class SinhVienFrame(BaseFrame):
         self.lbl_count.configure(text=f"Tìm thấy: {len(results)} sinh viên")
 
     def _on_add(self):
-        """Thêm sinh viên mới."""
         dialog = SinhVienDialog(self.winfo_toplevel())
         self.wait_window(dialog)
         if dialog.result:
@@ -252,7 +223,6 @@ class SinhVienFrame(BaseFrame):
                 Messagebox.show_error(msg, "Lỗi")
 
     def _on_edit(self):
-        """Sửa sinh viên đã chọn."""
         selected = self.tree.selection()
         if not selected:
             Messagebox.show_warning("Vui lòng chọn sinh viên cần sửa!", "Chưa chọn")
@@ -276,7 +246,6 @@ class SinhVienFrame(BaseFrame):
                 Messagebox.show_error(msg, "Lỗi")
 
     def _on_delete(self):
-        """Xóa sinh viên đã chọn (hỗ trợ xóa hàng loạt)."""
         selected = self.tree.selection()
         if not selected:
             Messagebox.show_warning("Vui lòng chọn sinh viên cần xóa!", "Chưa chọn")
@@ -318,7 +287,6 @@ class SinhVienFrame(BaseFrame):
             self.on_data_changed()
 
     def _on_import_excel(self):
-        """Import danh sách sinh viên từ file Excel."""
         filepath = filedialog.askopenfilename(
             title="Chọn file Excel danh sách sinh viên",
             filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")],
@@ -333,7 +301,6 @@ class SinhVienFrame(BaseFrame):
             Messagebox.show_error("\n".join(errors), "Lỗi import")
             return
 
-        # Thêm từng SV, bỏ qua trùng
         count_ok = 0
         count_skip = 0
         for sv in ds_sv:
@@ -354,7 +321,6 @@ class SinhVienFrame(BaseFrame):
         self.on_data_changed()
 
     def _on_export_template(self):
-        """Tải file Excel mẫu cho danh sách sinh viên."""
         filepath = filedialog.asksaveasfilename(
             title="Lưu file mẫu danh sách sinh viên",
             defaultextension=".xlsx",
@@ -370,12 +336,7 @@ class SinhVienFrame(BaseFrame):
         except Exception as e:
             Messagebox.show_error(f"Lỗi tạo file: {e}", "Lỗi")
 
-
-# ============================================================
-# FRAME QUẢN LÝ MÔN HỌC
-# ============================================================
 class MonHocFrame(BaseFrame):
-    """Frame quản lý môn học."""
 
     def __init__(self, parent, mh_manager, on_data_changed):
         super().__init__(parent, "Quản Lý Học Phần", "📚", "info")
@@ -454,7 +415,6 @@ class MonHocFrame(BaseFrame):
                 Messagebox.show_error(msg, "Lỗi")
 
     def _on_delete(self):
-        """Xóa môn học đã chọn (hỗ trợ xóa hàng loạt)."""
         selected = self.tree.selection()
         if not selected:
             Messagebox.show_warning("Vui lòng chọn học phần cần xóa!", "Chưa chọn")
@@ -496,7 +456,6 @@ class MonHocFrame(BaseFrame):
             self.on_data_changed()
 
     def _on_import_excel(self):
-        """Import danh sách môn học từ file Excel."""
         filepath = filedialog.askopenfilename(
             title="Chọn file Excel danh sách học phần",
             filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")],
@@ -531,7 +490,6 @@ class MonHocFrame(BaseFrame):
         self.on_data_changed()
 
     def _on_export_template(self):
-        """Tải file Excel mẫu cho danh sách môn học."""
         filepath = filedialog.asksaveasfilename(
             title="Lưu file mẫu danh sách học phần",
             defaultextension=".xlsx",
@@ -547,13 +505,7 @@ class MonHocFrame(BaseFrame):
         except Exception as e:
             Messagebox.show_error(f"Lỗi tạo file: {e}", "Lỗi")
 
-
-
-# ============================================================
-# FRAME QUẢN LÝ LỚP HỌC PHẦN
-# ============================================================
 class LopHocPhanFrame(BaseFrame):
-    """Frame quản lý lớp học phần."""
 
     def __init__(self, parent, lhp_manager, sv_manager, mh_manager, on_data_changed):
         super().__init__(parent, "Quản Lý Lớp Học Phần", "🏫", "success")
@@ -567,11 +519,9 @@ class LopHocPhanFrame(BaseFrame):
         self._build_header(self)
         self._build_search_bar(self, self._search)
 
-        # Chia layout: Bảng LHP bên trái, DS SV bên phải
         paned = ttk.Panedwindow(self, orient=HORIZONTAL)
         paned.pack(fill=BOTH, expand=True, padx=20, pady=(0, 5))
 
-        # --- Bảng LHP ---
         left_frame = tk.LabelFrame(paned, text="📋 Danh sách Lớp Học Phần", padx=5, pady=5)
 
         columns = ("ma_lhp", "ma_mon", "ten_mon", "hoc_ky", "nam_hoc", "so_sv")
@@ -592,7 +542,6 @@ class LopHocPhanFrame(BaseFrame):
 
         paned.add(left_frame, weight=3)
 
-        # --- DS sinh viên trong lớp ---
         right_frame = tk.LabelFrame(paned, text="👥 Sinh viên trong lớp", padx=5, pady=5)
 
         self.tree_sv = ttk.Treeview(
@@ -608,7 +557,6 @@ class LopHocPhanFrame(BaseFrame):
 
         self.tree_sv.pack(fill=BOTH, expand=True)
 
-        # Nút thêm/xóa SV trong lớp
         sv_btn_frame = ttk.Frame(right_frame)
         sv_btn_frame.pack(fill=X, pady=(5, 0))
 
@@ -624,7 +572,6 @@ class LopHocPhanFrame(BaseFrame):
 
         paned.add(right_frame, weight=2)
 
-        # Nút thao tác chính
         self._build_action_buttons(self, self._on_add, self._on_edit, self._on_delete)
         self.refresh()
 
@@ -642,7 +589,6 @@ class LopHocPhanFrame(BaseFrame):
                 lhp.hoc_ky, lhp.nam_hoc, lhp.so_luong_sv()
             ))
         self.lbl_count.configure(text=f"Tổng: {self.lhp_manager.so_luong()} lớp HP")
-        # Xóa danh sách SV
         for item in self.tree_sv.get_children():
             self.tree_sv.delete(item)
 
@@ -664,7 +610,6 @@ class LopHocPhanFrame(BaseFrame):
         self.lbl_count.configure(text=f"Tìm thấy: {len(results)} lớp HP")
 
     def _on_select_lhp(self, event):
-        """Khi chọn lớp HP, hiển thị DS sinh viên trong lớp."""
         for item in self.tree_sv.get_children():
             self.tree_sv.delete(item)
 
@@ -737,7 +682,6 @@ class LopHocPhanFrame(BaseFrame):
                 Messagebox.show_error(msg, "Lỗi")
 
     def _on_add_sv_to_class(self):
-        """Thêm SV vào lớp HP đang chọn."""
         selected = self.tree.selection()
         if not selected:
             Messagebox.show_warning("Vui lòng chọn lớp HP trước!", "Chưa chọn lớp")
@@ -749,7 +693,6 @@ class LopHocPhanFrame(BaseFrame):
             Messagebox.show_warning("Chưa có sinh viên nào!", "Chưa có dữ liệu")
             return
 
-        # Popup chọn SV
         popup = ttk.Toplevel(self.winfo_toplevel())
         popup.title("Chọn sinh viên")
         popup.geometry("400x400")
@@ -798,7 +741,6 @@ class LopHocPhanFrame(BaseFrame):
         ttk.Button(popup, text="✅ Thêm", bootstyle="success", command=_add_selected, padding=(15, 8)).pack(pady=(0, 15))
 
     def _on_remove_sv_from_class(self):
-        """Xóa SV khỏi lớp HP."""
         selected_lhp = self.tree.selection()
         selected_sv = self.tree_sv.selection()
 
@@ -826,12 +768,7 @@ class LopHocPhanFrame(BaseFrame):
                         break
                 self.on_data_changed()
 
-
-# ============================================================
-# FRAME QUẢN LÝ ĐIỂM
-# ============================================================
 class DiemFrame(BaseFrame):
-    """Frame quản lý điểm số."""
 
     def __init__(self, parent, diem_manager, sv_manager, mh_manager, on_data_changed):
         super().__init__(parent, "Quản Lý Điểm Số", "📊", "warning")
@@ -954,7 +891,6 @@ class DiemFrame(BaseFrame):
                 self.on_data_changed()
 
     def _on_delete(self):
-        """Xóa điểm đã chọn (hỗ trợ xóa hàng loạt)."""
         selected = self.tree.selection()
         if not selected:
             Messagebox.show_warning("Vui lòng chọn bản ghi cần xóa!", "Chưa chọn")
@@ -996,7 +932,6 @@ class DiemFrame(BaseFrame):
             self.on_data_changed()
 
     def _on_view_bangdiem(self):
-        """Xem bảng điểm tổng hợp của 1 SV."""
         selected = self.tree.selection()
         mssv = ""
 
@@ -1051,7 +986,6 @@ class DiemFrame(BaseFrame):
         )
 
     def _on_import_excel(self):
-        """Import danh sách điểm từ file Excel."""
         filepath = filedialog.askopenfilename(
             title="Chọn file Excel danh sách điểm",
             filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")],
@@ -1098,7 +1032,6 @@ class DiemFrame(BaseFrame):
         self.on_data_changed()
 
     def _on_export_template(self):
-        """Tải file Excel mẫu cho nhập điểm."""
         filepath = filedialog.asksaveasfilename(
             title="Lưu file mẫu nhập điểm",
             defaultextension=".xlsx",
