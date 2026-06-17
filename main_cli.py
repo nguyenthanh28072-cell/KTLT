@@ -307,10 +307,8 @@ def quan_ly_lhp(lhp_manager, sv_manager, mh_manager):
 
 
 def main():
-    # Load dữ liệu từ 4 file nhị phân
     ds_sv, ds_mh, ds_lhp, ds_diem = load_all()
-    
-    # Khởi tạo các Manager
+
     sv_manager = SinhVienManager(ds_sv)
     mh_manager = MonHocManager(ds_mh)
     lhp_manager = LopHocPhanManager(ds_lhp)
