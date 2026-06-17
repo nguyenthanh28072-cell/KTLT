@@ -1,13 +1,9 @@
-# gui/stats_frame.py - Frame thống kê và báo cáo
-# Hiển thị biểu đồ, top SV, thống kê theo xếp loại
-
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 import tkinter as tk
 
 
 class ThongKeFrame(ttk.Frame):
-    """Frame thống kê và báo cáo kết quả học tập."""
 
     def __init__(self, parent, diem_manager, sv_manager, mh_manager, lhp_manager=None):
         super().__init__(parent)
@@ -18,7 +14,6 @@ class ThongKeFrame(ttk.Frame):
         self._build_ui()
 
     def _build_ui(self):
-        # Header
         header = ttk.Frame(self)
         header.pack(fill=X, padx=20, pady=(20, 10))
 
@@ -32,31 +27,24 @@ class ThongKeFrame(ttk.Frame):
             command=self.refresh, padding=(10, 6)
         ).pack(side=RIGHT)
 
-        # Notebook tabs
         self.notebook = ttk.Notebook(self, bootstyle="danger")
         self.notebook.pack(fill=BOTH, expand=True, padx=20, pady=(0, 15))
 
-        # Tab 1: Thống kê xếp loại
         self.tab_xep_loai = ttk.Frame(self.notebook, padding=15)
         self.notebook.add(self.tab_xep_loai, text="📊 Phân bố xếp loại")
 
-        # Tab 2: Top sinh viên
         self.tab_top_sv = ttk.Frame(self.notebook, padding=15)
         self.notebook.add(self.tab_top_sv, text="🏆 Top sinh viên")
 
-        # Tab 3: Tổng quan
         self.tab_tong_quan = ttk.Frame(self.notebook, padding=15)
         self.notebook.add(self.tab_tong_quan, text="📋 Tổng quan")
 
     def refresh(self):
-        """Cập nhật toàn bộ thống kê."""
         self._build_tab_xep_loai()
         self._build_tab_top_sv()
         self._build_tab_tong_quan()
 
     def _build_tab_xep_loai(self):
-        """Xây dựng tab thống kê xếp loại với biểu đồ thanh ngang."""
-        # Xóa nội dung cũ
         for w in self.tab_xep_loai.winfo_children():
             w.destroy()
 
@@ -65,7 +53,6 @@ class ThongKeFrame(ttk.Frame):
             self.mh_manager.ds_mon_hoc
         )
 
-        # Kiểm tra có dữ liệu không
         total_sv = sum(thong_ke.values())
         if total_sv == 0:
             ttk.Label(
@@ -81,7 +68,6 @@ class ThongKeFrame(ttk.Frame):
             font=("Segoe UI", 13, "bold"), bootstyle="light"
         ).pack(anchor=W, pady=(0, 15))
 
-        # Biểu đồ thanh ngang bằng Canvas
         canvas_frame = ttk.Frame(self.tab_xep_loai)
         canvas_frame.pack(fill=BOTH, expand=True)
 
@@ -110,14 +96,12 @@ class ThongKeFrame(ttk.Frame):
             y = y_start + i * (bar_height + 12)
             color = colors.get(label, "#888888")
 
-            # Label
             canvas.create_text(
                 x_label - 5, y + bar_height // 2,
                 text=label, anchor=E,
                 fill="white", font=("Segoe UI", 11, "bold")
             )
 
-            # Bar
             bar_width = (count / max_val * max_bar_width) if max_val > 0 else 0
             if bar_width < 5 and count > 0:
                 bar_width = 5
@@ -127,7 +111,6 @@ class ThongKeFrame(ttk.Frame):
                 fill=color, outline=""
             )
 
-            # Count text
             pct = (count / total_sv * 100) if total_sv > 0 else 0
             canvas.create_text(
                 x_bar_start + bar_width + 10, y + bar_height // 2,
@@ -135,7 +118,6 @@ class ThongKeFrame(ttk.Frame):
                 anchor=W, fill="white", font=("Segoe UI", 10)
             )
 
-        # Bảng tổng hợp bên dưới
         summary_frame = tk.LabelFrame(self.tab_xep_loai, text="📊 Chi tiết", padx=10, pady=10, fg="white", bg="#2b2b2b")
         summary_frame.pack(fill=X, pady=(10, 0))
 
@@ -157,7 +139,6 @@ class ThongKeFrame(ttk.Frame):
             tree.insert("", END, values=(label, count, f"{pct:.1f}%"))
 
     def _build_tab_top_sv(self):
-        """Xây dựng tab top sinh viên."""
         for w in self.tab_top_sv.winfo_children():
             w.destroy()
 
@@ -214,7 +195,6 @@ class ThongKeFrame(ttk.Frame):
             ))
 
     def _build_tab_tong_quan(self):
-        """Xây dựng tab tổng quan."""
         for w in self.tab_tong_quan.winfo_children():
             w.destroy()
 
@@ -224,7 +204,6 @@ class ThongKeFrame(ttk.Frame):
             font=("Segoe UI", 13, "bold"), bootstyle="light"
         ).pack(anchor=W, pady=(0, 15))
 
-        # Cards thống kê
         cards_frame = ttk.Frame(self.tab_tong_quan)
         cards_frame.pack(fill=X, pady=(0, 15))
 
@@ -245,7 +224,6 @@ class ThongKeFrame(ttk.Frame):
                 font=("Segoe UI", 28, "bold"), bootstyle=style
             ).pack()
 
-        # Bảng GPA tất cả SV
         if self.sv_manager.ds_sinh_vien and self.diem_manager.ds_diem:
             gpa_frame = tk.LabelFrame(
                 self.tab_tong_quan, text="📈 GPA Tổng Hợp Tất Cả Sinh Viên",
